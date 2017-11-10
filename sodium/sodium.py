@@ -48,24 +48,37 @@ class SodiumTestRunner(adsk.core.CustomEventHandler):
         app = adsk.core.Application.get()
         app.fireCustomEvent(self._event_id)
 
+    def _cleanup_test_and_run_next(self, cmddef, handler):
+        cmddef.commandCreated.remove(handler)
+        self._run_next()
+
     def notify(self, args):
         if self._testcases:
             print('Starting test!')
             testcase = self._testcases.pop(0)
             test_finish = self._make_test_finish(testcase)
+            cmddef = None
             try:
-                cmddef, base_handler = testcase.setUp()
-                self._handler = CommandTestExecutor(base_handler)
+                cmddef = testcase.setUp()
+                # FIXME: this could stand to be cleaned up.  Basically, we create the test executor, add it as a commandCreated
+                # handler (which needs to be undone in all cases, success, failure, or exception), set up the executor
+                # to run our test, record our results, and run the next test on destroy, and then kick off the test
+                # cmddef can be local, but the handler needs a global/long lived reference (hence self._handler)
+                # and we need to clean up properly in our exception code as well
+                self._handler = CommandTestExecutor(None)
                 self._handler.on_test_run(testcase.testCommand)
                 self._handler.on_test_finish(test_finish)
-                self._handler.on_test_destroy(self._run_next)
+                self._handler.on_test_destroy(lambda: self._cleanup_test_and_run_next(cmddef, self._handler))
                 cmddef.commandCreated.add(self._handler)
                 print('Executing...')
                 cmddef.execute()
             except Exception as e:
                 traceback.print_exc()
                 test_finish(False, e)
-                self._run_next()
+                if cmddef is not None and self._handler is not None:
+                    self._cleanup_test_and_run_next(cmddef, self._handler)
+                else:
+                    self._run_next()
         else:
             self.print_results()
             self.cleanup()
