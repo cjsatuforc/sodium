@@ -6,29 +6,43 @@ from .command_test_executor import CommandTestExecutor
 import traceback
 import uuid
 
+"""
+    SodiumInspector - instantate to inspect a command as it's created, and pull out UI ids that could be testable objects
+"""
+class SodiumInspector():
+    pass
+
 
 class SodiumTestRunner(adsk.core.CustomEventHandler):
+    """
+        SodiumTestRunner - A test runner for CommandTestCase tests.  Use this class by adding all of the tests you want
+        to run, and then calling run.
+    """
     def __init__(self):
         super().__init__()
         self._testcases = []
+        self._complete_handlers = []
         self._results = []
         self._handler = None
         self._event_id = uuid.uuid4().hex
 
-    def prerun(self):
+    def _pre_run(self):
         app = adsk.core.Application.get()
         event = app.registerCustomEvent(self._event_id)
         event.add(self)
 
-    def cleanup(self):
+    def _cleanup(self):
         app = adsk.core.Application.get()
         app.unregisterCustomEvent(self._event_id)
+
+    def add_complete_handler(self, h):
+        self._complete_handlers.append(h)
 
     def add(self, testcase):
         self._testcases.append(testcase)
 
     def run(self):
-        self.prerun()
+        self._pre_run()
         self._run_next()
 
     def _make_test_finish(self, testcase):
@@ -80,8 +94,12 @@ class SodiumTestRunner(adsk.core.CustomEventHandler):
                 else:
                     self._run_next()
         else:
-            self.print_results()
-            self.cleanup()
+            self._cleanup()
+            self._notify_complete()
+
+    def _notify_complete(self):
+        for h in self._complete_handlers:
+            h(self)
 
     def print_results(self):
         print('Test results:')
