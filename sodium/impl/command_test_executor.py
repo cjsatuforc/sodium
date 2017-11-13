@@ -7,20 +7,10 @@
 import adsk.core
 import traceback
 
-from .model.hooked_object import HookedObject
-from .model.command_input_tracker import CommandInputTracker
+from ..helper.function_destroy_handler import FunctionDestroyHandler
 
 
 class CommandTestExecutor(adsk.core.CommandCreatedEventHandler):
-
-    class DestroyHandler(adsk.core.CommandEventHandler):
-        def __init__(self, fn):
-            super().__init__()
-            self._fn = fn
-
-        def notify(self, args):
-            print('on destroy, calling fn!')
-            self._fn()
 
     class ActivateHandler(adsk.core.CommandEventHandler):
         def __init__(self, inputs, run_test_fn, finalize):
@@ -64,7 +54,7 @@ class CommandTestExecutor(adsk.core.CommandCreatedEventHandler):
             command.activate.add(onActivate)
             self._handlers.append(onActivate)
 
-            onDestroy = CommandTestExecutor.DestroyHandler(self._test_destroy_fn)
+            onDestroy = FunctionDestroyHandler(self._test_destroy_fn)
             command.destroy.add(onDestroy)
             self._handlers.append(onDestroy)
         except Exception as e:

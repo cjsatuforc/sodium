@@ -1,16 +1,54 @@
 
-import adsk.core
-
-from .model.test_result import TestResult
-from .command_test_executor import CommandTestExecutor
 import traceback
 import uuid
 
-"""
-    SodiumInspector - instantate to inspect a command as it's created, and pull out UI ids that could be testable objects
-"""
-class SodiumInspector():
-    pass
+import adsk.core
+from .impl import CommandTestExecutor
+from .impl import CommandInspector
+from .model.test_result import TestResult
+
+
+class SodiumInspector:
+    """
+        SodiumInspector - instantate to inspect a command as it's created, and pull out UI ids that could be testable objects
+    """
+    def __init__(self):
+        self._handler = None
+        self._input_ids = {}
+
+    def _make_close_callback(self, cmddef, handler):
+        def callback():
+            cmddef.commandCreated.remove(handler)
+            self.print_results()
+
+        return callback
+
+    def inspect(self, cmdid):
+        try:
+            app = adsk.core.Application.get()
+            userInterface = app.userInterface
+            cmddef = userInterface.commandDefinitions.itemById(cmdid)
+            if cmddef is None:
+                print('Command not found at id ' + cmdid)
+            else:
+                ids = []
+                self._input_ids[cmddef.id] = ids
+                self._handler = CommandInspector(ids)
+                self._handler.set_close_callback(self._make_close_callback(cmddef, self._handler))
+                cmddef.commandCreated.add(self._handler)
+                cmddef.execute()
+        except:
+            traceback.print_exc()
+
+
+    def print_results(self):
+        print('%d commands inspected' % len(self._input_ids))
+        print('')
+        for k in self._input_ids:
+            print('For command id=%s:' % k)
+            for cmdid in self._input_ids[k]:
+                print(cmdid)
+            print('-----------------------')
 
 
 class SodiumTestRunner(adsk.core.CustomEventHandler):

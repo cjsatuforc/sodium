@@ -5,10 +5,12 @@
 
     This class is intended to be used as part of a HookedObject passed into a command handler, but could
     also be used for stubbing/mocking, for testing UI builder code.
+
+    DEPRECATED: This class represents an old way of hooking into a command, and is no longer used.  It's kept around
+    for now just in case we need it.
 """
 
 import adsk.core
-
 
 class CommandInputTracker:
     def __init__(self, commandInputs, inputs=None):

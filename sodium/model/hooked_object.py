@@ -13,6 +13,8 @@ To return an external value for "bar" in all cases:
 
 Each hook is a 2-tuple that consists of a test of the name being accessed and a function get the appropriate value.
 
+    DEPRECATED: This class represents an old way of hooking into a command, and is no longer used.  It's kept around
+    for now just in case we need it.
 """
 
 
