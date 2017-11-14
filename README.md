@@ -106,4 +106,4 @@ A: We're always looking for talented people who share our passions, but we are a
 
 Q: Why is this named sodium?
 
-A: Because it enables fusion tests (See https://en.wikipedia.org/wiki/Sodium_fusion_test)
+A: Because it enables fusion tests (and our founder has a terrible sense of humor.  See https://en.wikipedia.org/wiki/Sodium_fusion_test)
