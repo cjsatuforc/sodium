@@ -1,7 +1,9 @@
 # sodium
 Fusion 360 add-in UI testing framework, written in Python.
 
-This framework allows you to automate UI and integration testing for your add-in, running right in Fusion 360.  Though it is written in Python, it should work with add-ins defined in any language (provided to you use our suggested setup)
+This framework allows you to automate UI and integration testing for your add-in, running right in Fusion 360.  Though it is written in Python, it should work with add-ins defined in any language (provided to you use our suggested setup).
+
+## Usage
 
 To setup for use (suggested):
 
@@ -71,6 +73,8 @@ e.g.
 * Use the console in Spyder or the TextCommandPalette in Fusion 360 to view the results.
 
 You can add as many additional tests to your test add-in project, organize your tests into packages, or break out different run_tests functions for different scenarios.
+
+## Questions and Answers
 
 Q: Do I have to create a separate project?
 
